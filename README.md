@@ -2,14 +2,15 @@
 
 ## Overview
 
-This Flask application implements a logistic regression model to predict the likelihood of hotel booking cancellations based on various factors. The app provides an interactive interface for users to input their booking details and receive predictions regarding the probability of cancellation.
+This Flask application implements a logistic regression model to predict the likelihood of hotel booking cancellations based on various factors. Additionally, it features an interactive dashboard for visualizing hotel booking data, enabling users to explore trends and insights related to guest behaviour.
 
 ## Key Features
 
 - **Logistic Regression Model**: Trained on historical booking data to learn patterns and make predictions about booking cancellations.
 - **Data Preprocessing and Normalization**: Ensures data is prepared accurately for model training and predictions.
-- **Interactive Form Interface**: Users can easily input booking details, such as lead time and average price, to receive predictions.
+- **Interactive Form Interface**: Allows users to input booking details and receive predictions regarding the probability of cancellation.
 - **Model Evaluation**: Displays performance metrics like accuracy, confusion matrix, and classification report for transparency and reliability.
+- **Interactive Dashboard**: Visualizes booking data through various charts, allowing users to explore relationships between different features (e.g., guest demographics, room types, market segments).
 - **Clear Output Messages**: Provides users with intuitive feedback based on predicted cancellation probabilities.
 
 ## Dependencies
@@ -21,75 +22,94 @@ To run this application, ensure you have the following libraries installed:
 - **Pandas**: Data manipulation and analysis library.
 - **Scikit-learn**: Provides machine learning algorithms like Logistic Regression.
 - **Joblib**: Facilitates model persistence and loading.
+- **Dash**: For building the interactive dashboard.
+- **Plotly**: For creating visualizations within the dashboard.
 
 You can install these dependencies using pip:
 
 ```bash
-pip install Flask numpy pandas scikit-learn joblib
+pip install Flask numpy pandas scikit-learn joblib dash plotly
 ```
 
-## Model Training (Not Included in Flask App)
+## Hotel Booking Dashboard
 
-### Data Preprocessing
+This code creates an interactive dashboard to visualize hotel booking data using Dash, a Python framework for building web applications.
 
-1. **Read the CSV Data File**: Load your dataset (`data.csv`) containing booking information.
-2. **Drop Irrelevant Features**: Clean the dataset by removing non-informative columns.
-3. **Normalize Features**: Normalize continuous features (`lead time` and `average price`) using `MinMaxScaler`.
-4. **Handle Missing Values**: Clean the dataset to ensure no missing values affect model performance.
-5. **Split Data**: Divide the prepared DataFrame into training and testing sets for model training and evaluation.
+### Data Preparation
 
-### Logistic Regression Training
+1. **Library Imports**: The code imports necessary libraries, including:
+   - `pandas` for data manipulation,
+   - `plotly.express` and `plotly.graph_objs` for creating visualizations,
+   - `Dash` for building the web application.
+   
+2. **Data Loading**: Loads the CSV data file containing hotel booking information.
 
-1. **Sigmoid Function**: Implement the sigmoid function for hypothesis calculation.
-2. **Cost Function**: Define the compute cost function to measure model error.
-3. **Gradient Descent**: Implement the gradient descent function to iteratively minimize the cost function.
-4. **Train Model**: Train the model using `train_logistic_regression` with appropriate hyperparameters (learning rate, iterations).
+3. **Preprocessing**: Cleans and formats the data, including:
+   - Converting date formats,
+   - Handling missing values,
+   - Transforming categorical features into numerical representations.
 
-### Model Evaluation
+### Interactive Dashboard Layout
 
-1. **Make Predictions**: Use the trained model to predict outcomes on the testing set.
-2. **Performance Metrics**: Calculate accuracy, confusion matrix, and classification report to assess model performance.
-3. **Model Persistence**: Use `joblib.dump` to save the trained weights for faster deployment in the Flask app.
+- **App Structure**: The `app.layout` defines the structure of the dashboard, which includes:
+  - A title: "Hotel Booking Dashboard".
+  - Two rows allowing users to filter data:
+    - **DatePickerRange**: For selecting a date range for reservations.
+    - **RangeSlider**: For filtering based on the number of weekend nights desired.
 
-## Flask App Development
+- **Interactive Charts**: Four separate `dcc.Graph` components display interactive charts:
+  - **Adults and Children Chart**: Shows the total number of adults and children for the selected date range and weekend night filter.
+  - **Room Types Chart**: A bar chart depicting the distribution of booked room types for the filtered data.
+  - **Market Segment Chart**: A pie chart visualizing the distribution of bookings across different market segments (Offline, Online, Corporate, etc.).
+  - **Booking Status Chart**: Displays a pie chart showing the percentage of canceled and non-canceled bookings within the filtered data.
 
-### App Initialization
+### Data Filtering and Chart Updates
 
-1. **Create Flask Instance**: Initialize the Flask app using `Flask(__name__)`.
+- **Callback Function**: The `@app.callback` decorator defines a function that updates the charts based on user interactions. It takes input from:
+  - The selected date range (start_date and end_date) from the DatePickerRange.
+  - The chosen weekend night range (weekend_nights) from the RangeSlider.
+  
+- **Data Filtering**: The function filters the original data frame (`df`) based on the selected criteria, creating a new `filtered_df`.
 
-### Data Loading and Preprocessing
+- **Chart Generation**: It generates figures for each chart based on the filtered data:
+  - Adults and Children Chart: A bar chart representing the total number of adults and children.
+  - Room Types Chart: A bar chart showing the distribution of room types.
+  - Market Segment Chart: A pie chart depicting market segment distribution.
+  - Booking Status Chart: A pie chart visualizing the percentage of canceled and non-canceled bookings.
 
-- Load preprocessed data using `pd.read_csv`.
-- Access trained weights from `weights.pkl` using `joblib.load`.
+- **Return Updated Figures**: The function returns a tuple containing the updated figures for all four charts.
 
-### Routing
+### Running the Application
 
-- **Main Page (`/`)**: Renders the `hotelform.html` template, which displays the user input form.
-- **Prediction Page (`/predictpage`)**: Handles form submission using the POST method.
+1. **Execution**: The `if __name__ == '__main__':` block executes the code when the script is run directly. It starts the Dash app server in debug mode (`debug=True`) on port 8052.
+  
+2. **Accessing the Dashboard**:
+   - Save the code as a Python file (e.g., `hotel_booking_dashboard.py`).
+   - Open a terminal or command prompt and navigate to the directory where you saved the file.
+   - Run the script using the command:
+     ```bash
+     python hotel_booking_dashboard.py
+     ```
+   - This will launch the web application in your default browser, typically at `http://localhost:8052/`.
 
-### Prediction Logic
+### Interacting with the Dashboard
 
-1. **Extract User Input**: Convert form inputs to appropriate data types (int, float).
-2. **Normalize Input Data**: Normalize `lead_time` and `average_price` using the pre-loaded scaler.
-3. **Prepare Input Array**: Create an input array for prediction with the normalized values.
-4. **Make Prediction**: Use the trained model to predict outcomes and calculate the probability.
+- **User Input**: Use the date picker to select a desired reservation date range.
+- **Adjust Filters**: Adjust the range slider to filter bookings based on the number of weekend nights.
+- **Dynamic Updates**: Observe how the charts update dynamically to reflect the chosen filters.
 
-### User Feedback
+This interactive dashboard provides a user-friendly way to explore hotel booking data and gain insights into guest behaviour, room type preferences, market segment performance, and booking trends.
 
-Based on the prediction, users receive feedback:
-- **High Probability**: "You have a high probability of canceling your reservation."
-- **Low Probability**: "That's the spirit! You wouldn't cancel your precious reservation."
+## Running the Flask App
 
-## Running the App
-
-1. **Save the Code**: Save the code as a Python file (e.g., `hotel_booking_cancellation_app.py`).
+1. **Save the Code**: Save the Flask app code as a Python file (e.g., `main.py`).
 2. **Ensure Accessibility**: Ensure the preprocessed data and trained model weights are accessible.
 3. **Run the Application**:
    - Open a terminal or command prompt and navigate to the directory where you saved the file.
    - Run the app using the command:
-   ```bash
-   python hotel_booking_cancellation_app.py
-   ```
+     ```bash
+     python main.py
+     ```
 4. **Access the App**: Open a web browser and navigate to `http://localhost:5000/` (default Flask port).
 
 ## Further Considerations
@@ -99,3 +119,7 @@ Based on the prediction, users receive feedback:
 - Explore other machine learning algorithms for comparative analysis.
 - Implement more comprehensive data visualizations to explore booking trends and cancellation factors.
 - Consider deploying the app to a production environment for broader use.
+
+---
+
+This README now fully incorporates the details of the interactive dashboard and how it fits into the overall hotel booking cancellation prediction application. Let me know if you need any additional modifications!
